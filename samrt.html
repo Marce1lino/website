@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+  <body>
+   <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.4.20.2.js"></script>
+    <button type="button" onclick="publish('ON')">Lamp ON</button>
+<button type="button" onclick="publish('OFF')">Lamp OFF</button>
+<p id="lights">Lights are on?</p>
+<script >
+var pubnub = new PubNub({
+  publishKey : 'pub-c-2d8f55f6-daa7-467b-923b-6a1e6570c9fc',
+  subscribeKey : 'sub-c-1575c412-2116-11e8-a7d0-2e884fd949d2',
+  });
+  function publish(a)
+    var publishConfig = 
+    {
+      channel : "ch1",   //Your publishing channel name
+      message : a
+    };
+    pubnub.publish(publishConfig, function(status, response){
+      console.log(status, response);
+    });
+    
+  }
+  pubnub.addListener({
+        message: function(m) {
+            // handle message
+            var channelName = m.channel; // The channel for which the message belongs
+            var channelGroup = m.subscription; // The channel group or wildcard subscription match (if exists)
+            var pubTT = m.timetoken; // Publish timetoken
+            var msg = m.message; // The Payload
+            var publisher = m.publisher; //The Publisher
+            document.getElementById("lights").innerHTML = msg;
+            console.log(msg)
+        },
+        presence: function(p) {
+            // handle presence
+            var action = p.action; // Can be join, leave, state-change or timeout
+            var channelName = p.channel; // The channel for which the message belongs
+            var occupancy = p.occupancy; // No. of users connected with the channel
+            var state = p.state; // User State
+            var channelGroup = p.subscription; //  The channel group or wildcard subscription match (if exists)
+            var publishTime = p.timestamp; // Publish timetoken
+            var timetoken = p.timetoken;  // Current timetoken
+            var uuid = p.uuid; // UUIDs of users who are connected with the channel
+        },
+        status: function(s) {
+            var affectedChannelGroups = s.affectedChannelGroups;
+            var affectedChannels = s.affectedChannels;
+            var category = s.category;
+            var operation = s.operation;
+        }
+    });
+    pubnub.subscribe({
+        channels: ['ch2'],
+        
+    });
+
+    </script>
+  </body>
+</html>
